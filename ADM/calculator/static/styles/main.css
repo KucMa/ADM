@@ -1,0 +1,42 @@
+body {
+    font-family: 'Trebuchet MS';
+    background-color: rgb(255, 145, 0);
+    color: rgb(255, 145, 0);
+}
+
+.site_title {
+    
+    background-color: black;
+    padding: 6px;
+    margin-bottom: 0px;
+    text-align: center;
+}
+
+#tools {
+	background-color:black;
+    overflow: hidden;
+    height: 70px;
+}
+#tools ul {
+	list-style-type:none;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    margin: 25.8px 0;
+}
+#tools a {
+    border: solid 2px black;
+    border-radius: 5px;
+    padding: 8px;
+    margin: 0 15px;
+    text-decoration: none;
+    background-color: rgb(255, 68, 0);
+    color: black;
+}
+
+.series_form {
+    background-color: black;
+    font-size: 150%;
+    display: block;
+    margin: 0 auto;
+}
