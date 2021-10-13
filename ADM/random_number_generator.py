@@ -7,7 +7,9 @@ class Random_number_generator :
             self.multiplier = multiplier
             self.increment = increment
             self.x_zero = x_zero
-            self.l_random_numbers = self.generate_random_sequence()
+            self.xn_random_numbers = self.generate_random_sequence()
+            self.un_random_numbers = self.__convert_to_u_n()
+            self.yn_random_numbers = self.__convert_to_y_n()
 
 
         '''@property
@@ -34,57 +36,64 @@ class Random_number_generator :
 
         
         def generate_random_sequence(self) :
-            l_random_numbers = []
-            l_random_numbers.append(self.x_zero)
+            xn_random_numbers = []
+            xn_random_numbers.append(self.x_zero)
 
             new_term = (self.multiplier * self.x_zero + self.increment) % self.module
 
             while new_term != self.x_zero :
-                l_random_numbers.append(new_term)
+                xn_random_numbers.append(new_term)
                 prev_term = new_term
                 new_term = (self.multiplier * prev_term + self.increment) % self.module
 
-            return l_random_numbers
+            return xn_random_numbers
         
         def display_random_sequence(self) :
-            for nb in self.l_random_numbers:
+            for nb in self.xn_random_numbers:
                 print(nb)
 
         def period_length(self):
-            return len(self.l_random_numbers)
+            return len(self.xn_random_numbers)
 
         def is_max_period_length(self) :
             if gcd(self.module, self.increment) != 1:
                 return False
             
-            if not all(map(lambda x : is_multiple(self.multiplier - 1, x), prime_factor(self.module))):
+            if not all(map(lambda x : self.__is_multiple(self.multiplier - 1, x), self.__prime_factor(self.module))):
                 return False
 
-            if is_multiple(self.module, 4):
-                if not is_multiple(self.multiplier - 1, 4):
+            if self.__is_multiple(self.module, 4):
+                if not self.__is_multiple(self.multiplier - 1, 4):
                     return False
             
             return True
 
-def prime_factor(nb) :
-    result = []
-    div = 2
+        def __prime_factor(self, nb) :
+            result = []
+            div = 2
 
-    while nb % div == 0:
-        result.append(div)
-        nb = int(nb / div)
-    div = 3
+            while nb % div == 0:
+                result.append(div)
+                nb = int(nb / div)
+            div = 3
 
-    while div <= nb:
-        while nb % div == 0:
-            result.append(div)
-            nb = int(nb / div)
+            while div <= nb:
+                while nb % div == 0:
+                    result.append(div)
+                    nb = int(nb / div)
 
-        div = div + 2
-    return result
+                div = div + 2
+            return result
 
-def is_multiple(multiple, nb):
-    return multiple % nb == 0
+        def __is_multiple(self, multiple, nb):
+            return multiple % nb == 0
+
+        def __convert_to_u_n (self) :
+            return map(lambda x : x / self.module, self.xn_random_numbers)
+        
+        def __convert_to_y_n (self) : 
+            return map(lambda x : int(x * 10), self.un_random_numbers)
+            
 
 test_1 = Random_number_generator(100, 13, 65, 35)
 test_2 = Random_number_generator(16, 5, 3, 7)
