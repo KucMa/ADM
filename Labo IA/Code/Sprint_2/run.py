@@ -1,7 +1,7 @@
 from models import Game
 from models import Player
 
-import os as os
+import os
 
 if __name__ == '__main__':
     player_1 = Player("Humain", input("Nom joueur 1 : "))
