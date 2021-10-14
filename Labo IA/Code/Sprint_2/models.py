@@ -55,11 +55,7 @@ class IA(Entity) :
 class Game:
 
     def __init__(self, player_1, player_2):
-<<<<<<< HEAD
         self.nb_matches = self.obtain_matches()
-=======
-        self.nb_matches = 12
->>>>>>> 00abbb2bb086cbc9a1e7056719a9f880974b33f8
         self.player_1 = player_1
         self.player_2 = player_2
         self.round_number = 1
@@ -68,23 +64,12 @@ class Game:
        print("O " * self.nb_matches)
        print("| " * self.nb_matches)
        print("| " * self.nb_matches)
-<<<<<<< HEAD
     
     def obtain_matches(self) :
         nb_matches = int(input("Combien d'allumettes pour la partie : "))
         while (nb_matches < 3 ):
             print("Le nombres d'allumettes ne peut être que 1, 2 ou 3")
             nb_matches = int(input("Combien d'allumettes pour la partie : "))
-=======
-
-    def get_number_matches(self):
-        nb_matches = int(input("Combien d'allumettes souhaitez-vous retirez (1, 2 ou 3) ? "))
-
-        while (nb_matches < 1 or nb_matches > 3):
-            print("Le nombres d'allumettes ne peut être que 1, 2 ou 3")
-            nb_matches = int(input("Combien d'allumettes souhaitez-vous retirez (1, 2 ou 3) ? "))
-
->>>>>>> 00abbb2bb086cbc9a1e7056719a9f880974b33f8
         return nb_matches
 
     def play(self):
