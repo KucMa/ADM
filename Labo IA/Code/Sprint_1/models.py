@@ -1,65 +1,15 @@
-import os
-from random import randrange
-from abc import ABCMeta, abstractmethod, ABC
+import os as os
 
-class Entity(ABC):
-
-    @property
-    @abstractmethod
-    def type(self):
-        pass
-
-    @abstractmethod
-    def name(self):
-        pass
-
-    def get_number_matches(self):
-        pass
-
+class Player:
     
     def __init__(self, type, name):
         self.type = type
         self.name = name
-
-class Player(Entity) :
-    type = "Humain"
-    def __init__(self, player_number):
-        self.name =  input("Nom joueur : ")
-        self.player_number = player_number
-    
-    def get_number_matches(self):
-        nb_matches = int(input("Combien d'allumettes souhaitez-vous retirez (1, 2 ou 3) ? "))
-
-        while (nb_matches < 1 or nb_matches > 3):
-            print("Le nombres d'allumettes ne peut être que 1, 2 ou 3")
-            nb_matches = int(input("Combien d'allumettes souhaitez-vous retirez (1, 2 ou 3) ? "))
-
-        return nb_matches
-
-class Random(Entity):
-    type = "Random"
-    def __init__(self, name, player_number):
-        self.name =  name
-        self.player_number = player_number
-    
-    def get_number_matches(self):
-        return randrange(1, 3)
-
-class IA(Entity) :
-    type = "IA"
-    def __init__(self):
-        pass
-    def get_number_matches(self):
-        pass
-
+        
 class Game:
 
     def __init__(self, player_1, player_2):
-<<<<<<< HEAD
-        self.nb_matches = self.obtain_matches()
-=======
         self.nb_matches = 12
->>>>>>> 00abbb2bb086cbc9a1e7056719a9f880974b33f8
         self.player_1 = player_1
         self.player_2 = player_2
         self.round_number = 1
@@ -68,14 +18,6 @@ class Game:
        print("O " * self.nb_matches)
        print("| " * self.nb_matches)
        print("| " * self.nb_matches)
-<<<<<<< HEAD
-    
-    def obtain_matches(self) :
-        nb_matches = int(input("Combien d'allumettes pour la partie : "))
-        while (nb_matches < 3 ):
-            print("Le nombres d'allumettes ne peut être que 1, 2 ou 3")
-            nb_matches = int(input("Combien d'allumettes pour la partie : "))
-=======
 
     def get_number_matches(self):
         nb_matches = int(input("Combien d'allumettes souhaitez-vous retirez (1, 2 ou 3) ? "))
@@ -84,7 +26,6 @@ class Game:
             print("Le nombres d'allumettes ne peut être que 1, 2 ou 3")
             nb_matches = int(input("Combien d'allumettes souhaitez-vous retirez (1, 2 ou 3) ? "))
 
->>>>>>> 00abbb2bb086cbc9a1e7056719a9f880974b33f8
         return nb_matches
 
     def play(self):
