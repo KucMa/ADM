@@ -47,15 +47,23 @@ class Random_number_generator :
             return multiple % nb == 0
 
         def __convert_to_u_n (self) :
-            return map(lambda x : x / self.module, self.xn_random_numbers)
+            return list(map(lambda x : x / self.module, self.xn_random_numbers))
         
         def __convert_to_y_n (self) : 
-            return map(lambda x : int(x * 10), self.un_random_numbers)
+            return list(map(lambda x : int(x * 10), self.un_random_numbers))
             
         ##PUBLIC METHODS##
         
-        def display_random_sequence(self) :
+        def display_xn(self) :
             for nb in self.xn_random_numbers:
+                print(nb)
+        
+        def display_un(self) :
+            for nb in self.un_random_numbers:
+                print(nb)
+
+        def display_yn(self) :
+            for nb in self.yn_random_numbers:
                 print(nb)
 
         def period_length(self):
@@ -83,21 +91,14 @@ test_4 = Random_number_generator(100, 13, 65, 7)
 test_5 = Random_number_generator(100, 13, 63, 7)
 test_6 = Random_number_generator(63, 22, 4, 7)
 
-print("Test 1")
-print(test_1.is_max_period_length())
-print(test_1.period_length())
-print("Test 2")
-print(test_2.is_max_period_length())
-print(test_2.period_length())
-print("Test 3")
-print(test_3.is_max_period_length())
-print(test_3.period_length())
-print("Test 4")
-print(test_4.is_max_period_length())
-print(test_4.period_length())
-print("Test 5")
-print(test_5.is_max_period_length())
-print(test_5.period_length())
-print("Test 6")
-print(test_6.is_max_period_length())
-print(test_6.period_length())
+
+print("XN")
+test_3.display_xn()
+print("------")
+
+print("YN")
+test_3.display_yn()
+print("------")
+
+print("UN")
+test_3.display_un()
