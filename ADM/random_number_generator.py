@@ -7,35 +7,13 @@ class Random_number_generator :
             self.multiplier = multiplier
             self.increment = increment
             self.x_zero = x_zero
-            self.xn_random_numbers = self.generate_random_sequence()
+            self.xn_random_numbers = self.__generate_random_sequence()
             self.un_random_numbers = self.__convert_to_u_n()
-            self.yn_random_numbers = self.__convert_to_y_n()
+            self.yn_random_numbers = self.__convert_to_y_n() 
 
+        ##PRIVATE METHODS##
 
-        '''@property
-        @multiplier.setter
-        def multiplier(self, multiplier):
-            if multiplier >= 2 and multiplier < self.module:
-                self.multiplier = multiplier
-
-        @increment.setter
-        def increment(self, increment):
-            if increment >= 0 and increment < self.module:
-                self.increment = increment
-
-        @module.setter
-        def module(self, module):
-            if module >= 3:
-                self.m = module
-        
-        @x_zero.setter
-        def x_zero(self, x_zero):
-            if x_zero >= 0 and x_zero < self.module:
-                self.x_zero = x_zero'''
-        
-
-        
-        def generate_random_sequence(self) :
+        def __generate_random_sequence(self) :
             xn_random_numbers = []
             xn_random_numbers.append(self.x_zero)
 
@@ -47,26 +25,6 @@ class Random_number_generator :
                 new_term = (self.multiplier * prev_term + self.increment) % self.module
 
             return xn_random_numbers
-        
-        def display_random_sequence(self) :
-            for nb in self.xn_random_numbers:
-                print(nb)
-
-        def period_length(self):
-            return len(self.xn_random_numbers)
-
-        def is_max_period_length(self) :
-            if gcd(self.module, self.increment) != 1:
-                return False
-            
-            if not all(map(lambda x : self.__is_multiple(self.multiplier - 1, x), self.__prime_factor(self.module))):
-                return False
-
-            if self.__is_multiple(self.module, 4):
-                if not self.__is_multiple(self.multiplier - 1, 4):
-                    return False
-            
-            return True
 
         def __prime_factor(self, nb) :
             result = []
@@ -94,6 +52,29 @@ class Random_number_generator :
         def __convert_to_y_n (self) : 
             return map(lambda x : int(x * 10), self.un_random_numbers)
             
+        ##PUBLIC METHODS##
+        
+        def display_random_sequence(self) :
+            for nb in self.xn_random_numbers:
+                print(nb)
+
+        def period_length(self):
+            return len(self.xn_random_numbers)
+
+        def is_max_period_length(self) :
+            if gcd(self.module, self.increment) != 1:
+                return False
+            
+            if not all(map(lambda x : self.__is_multiple(self.multiplier - 1, x), self.__prime_factor(self.module))):
+                return False
+
+            if self.__is_multiple(self.module, 4):
+                if not self.__is_multiple(self.multiplier - 1, 4):
+                    return False
+            
+            return True
+
+        
 
 test_1 = Random_number_generator(100, 13, 65, 35)
 test_2 = Random_number_generator(16, 5, 3, 7)
