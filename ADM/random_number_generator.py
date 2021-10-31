@@ -1,5 +1,6 @@
-from math import gcd
+from math import gcd, fsum
 from collections import Counter
+from functools import reduce
 
 
 class Random_number_generator:
@@ -56,6 +57,25 @@ class Random_number_generator:
     def __convert_to_y_n(self):
         return list(map(lambda x: int(x * 10), self.un_random_numbers))
 
+    def __chisquare(self, f_obs, f_exp=None):
+        if not f_exp:
+            f_exp = []
+            freq = 1 / len(f_obs)
+            for i in range(len(f_obs)):
+                f_exp[i] = freq
+        n = fsum(f_obs)
+        npi = [n * pi for pi in f_exp]
+        chisquare = self.__exp_value(npi, f_obs)
+
+        return chisquare
+
+    def __exp_value(self, npi, ri):
+        exp_value = 0
+
+        for i in range(len(npi)):
+            exp_value += (pow(ri[i] - npi[i], 2)) / npi[i]
+
+        return exp_value
     ##PUBLIC METHODS##
 
     def display_xn(self):
@@ -90,11 +110,11 @@ class Random_number_generator:
 
 
 test_1 = Random_number_generator(100, 13, 65, 35)
-test_2 = Random_number_generator(16, 5, 3, 7)
+""" test_2 = Random_number_generator(16, 5, 3, 7)
 test_3 = Random_number_generator(36, 13, 7, 7)
 test_4 = Random_number_generator(100, 13, 65, 7)
 test_5 = Random_number_generator(100, 13, 63, 7)
 test_6 = Random_number_generator(63, 22, 4, 7)
 
 
-test_3.frequency_test()
+test_3.frequency_test() """
