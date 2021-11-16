@@ -1,0 +1,48 @@
+Structures : 
+Client { statut, duréeAttente, duréeTraitement}
+Stations { client }
+File { liste de Clients }
+
+
+---* Simulation File Attente
+nbStations = nbStationsMin
+do while(nbStations <= nbStationsMax)
+longueurFile = 0
+duréeTotaleClientOrdinaire = 0
+duréeTotaleClientPrioritaire = 0
+duréeTotaleClientAbsolu = 0
+fileCumulée = 0 // A voir avec FE
+module(initStation;;stations)
+temps = 1
+do while (temps <= tempsSimulation)
+// Incrémenter durée totale des clients selon leur type + Retirer de la file les clients trop impatients
+module(gestionImpatience; file; file)
+// Générer x ordinaires, y relatifs selon les params poisson
+module(generationTypeClient;nbArrivées, clients; clients)
+longueurFile += nbArrivées
+ind = 1
+// Trier la file avec les nouveaux clients > (prio >>> normaux)
+module(gestionFile;file, clients;file)
+// Mettre les clients prio en station, et gérer les clients ejectés
+module(gestionClientPrioritaire;stations, file;stations, file)
+do while(ind < nbStations)
+if(stations[ind] == 0)
+if(longieurFile != 0) 
+longueurFile --
+module(generationDuréeTraitement;;stations[ind])
+module(avancerFile;file;file)
+stations[ind].duréeTraitement -- // On accéde à durée trt de client contenu dans stations
+endif
+else
+stations[ind].duréeTraitement -- // idem
+endif
+ind ++
+enddo
+fileCumulée += file
+temps ++
+endif
+couts[nbStations - nbStationsMin] = A * nbStations * B * fileCumulée / tempsSimulation // A adapter
+nbStations ++
+enddo 
+module(rechercheCoutMin;couts;nbStationsOptimal)
+------
