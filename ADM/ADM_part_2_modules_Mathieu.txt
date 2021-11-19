@@ -1,0 +1,59 @@
+Structures : 
+Client { statut, duréeAttente, duréeTraitement}
+Stations { client }
+File { Clients } // Changer vers cette version dans main sinon pFile -> pSuiv ? L'enfer ?
+
+// gérer les incr sur les durées totale => Parcourir la file après la gestion impatience
+// incr de 1 dans bonne catégorie en parcourant file
+module(gestionImpatience; file, longueurFile; file, longueurFile)
+---* gestionImpatience
+iFile = 0
+do while (iFile < longueurFile)
+file[iFile].duréeAttente ++
+
+if(file[iFile].statut == "ordinaire")
+duréeTotaleClientOrdinaire ++
+else if(file[iFile].statut == "prio_relatif")
+duréeTotaleClientPrioritaire ++
+else
+duréeTotaleClientAbsolu ++
+endif
+if(file[iFile].duréeAttente >= 10 && iFile >= 3)
+module(supprimerClient;iFile, file, longueurFile;file, longueurFile)
+endif
+iFile ++
+enddo
+------
+
+// Ajouter et trier la file avec les nouveaux clients > (prio >>> normaux)
+module(gestionFile;file, longueurFile, clients, nbArrivée;file, longueurFile)
+---* gestionFile
+iArrivée = 0
+do while(iArrivée < nbArrivée)
+module(ajoutClientFile;clients, file, longueurFile;clients, file, longueurFile)
+enddo
+------
+
+// supprimer le premier client de la file
+module(avancerFile;file;file)
+---* avancerFile
+iFile = 0
+module(copieClientVersStation;stations, file, iFile;stations)
+module(supprimerClient;iFile, file, longueurFile;file, longueurFile)
+------
+
+module(rechercheCoutMin;couts, nbStationsMin, nbStationsMax;nbStationsOptimal)
+---* rechercheCoutMin
+iFinCout = nbStationsMax - nbStations
+iCout = 0
+coutMin = HV
+iCoutMin = -1
+do while(iCout < iFinCout)
+if(couts[iCout] < coutMin)
+iCoutMin = iCout
+coutMin = couts[iCout]
+endif
+iCout ++
+enddo
+nbStationsOptimal = iCoutMin + nbStationsMin // Voir l'accès au tableau dans le calcul de la FE dans le main si pas clair
+------
