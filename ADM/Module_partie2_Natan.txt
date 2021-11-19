@@ -1,0 +1,124 @@
+Structures : 
+Client { statut, duréeAttente, duréeTraitement}
+Stations { client }
+File { liste de Clients }
+
+module(genererNouveauxClients;γPrioritaire,γOrdinaire,a,c,m,x0;clients,nbArrivées,x0)
+---* generationTypeClient
+clients = []
+module(générerNbArrivées;γ,a,c,m,x0;nbArrivéesClientsOrdinaires,x0)
+module(générerNbArrivées;γ,a,c,m,x0;nbArrivéesClientsPrioritaires,x0)
+nbAbsolus = nbArrivéesClientsPrioritaires * 0.3
+nbRelatifs = nbArrivéesClientsPrioritaires - nbAbsolus
+i = 0
+do while (i < nbAbsolus )
+client.statut = "absolu"
+client.duréeAttente = 0
+clients.append(client)
+i++
+enddo
+i = 0
+do while (i < nbRelatifs )
+client.statut = "relatif"
+client.duréeAttente = 0
+clients.append(client)
+i++
+enddo
+i = 0
+do while (i < nbArrivéesClientsOrdinaires)
+client.statut = "ordinaire"
+client.duréeAttente = 0
+clients.append(client)
+i++
+enddo
+nbArrivées = nbArrivéesClientsOrdinaires + nbArrivéesClientsPrioritaires
+------
+
+module(générerNbArrivées;γ,a,c,m,x0;nbArrivées,x0)
+---* générerNbArrivées
+module(générationNombreAléatoire;a,c,m,x0;x1)
+u1 = x1 / m
+x0 = x1
+k = 0
+fx = 0
+do
+module(loiPoisson;k,γ;probabilité)
+fx += probabilité
+k++
+enddo while (u1 >= fx)
+nbArrivées = k - 1
+------
+
+module(générationNombreAléatoire;a,c,m,x0;x1)
+---* générationNombreAléatoire
+x1 = (a * x0 + c) % m
+------
+
+module(loiPoisson;k,γ;probabilité)
+---* loiPoisson
+probabilité = ((e^-γ) * (γ^k)) / k!
+------
+
+module(gestionClientPrioritaire;stations, nbStations, file, longueurFile;stations, file)
+---* gestionClientPrioritaire
+iClient = 0
+clientsEjectés = []
+nbClientsEjectés = 0
+do while (iClient < longueurFile AND file[iClient].statut == "absolu")
+tempsTraitementMax = LV
+numStationMax = -1
+iStation = 0
+do while (iStation < nbStations)
+if (stations[iStation].statut == "ordinaire" and stations[iStation].duréeTraitement > tempsTraitementMax)
+numStationMax = iStation
+tempsTraitementMax = stations[iStation].duréeTraitement
+endif
+enddo
+if (numStation != -1)
+module(genererDuréeTraitement;a,c,m,x0;duréeTraitement,x0)
+clientsEjectés.append(stations[numStation])
+stations[numStation] = file[iClient]
+stations[numStation].duréeTraitement = duréeTraitement
+nbClientsEjectés++
+endif
+iClient++
+enddo
+iClientEjecté = 0
+do while (iClientEjecté < nbClientsEjectés)
+file[iClientEjecté] = clientsEjectés[iClientEjecté]
+iClientEjecté++
+enddo
+------
+
+module(genererDuréeTraitement;a,c,m,x0;duréeTraitement,x0)
+---* genererDuréeTraitement
+module(générationNombreAléatoire;a,c,m,x0;x1)
+u1 = x1 / m
+x0 = x1
+proba = 2 / 62
+if (u1 < proba)
+duréeTraitement = 6
+else
+proba += 3 / 62
+if (u1 < proba)
+duréeTraitement = 5
+else
+proba += 4 / 62
+if (u1 < proba)
+duréeTraitement = 4
+else
+proba += 11 / 62
+if (u1 < proba)
+duréeTraitement = 3
+else
+proba += 18 / 62
+if (u1 < proba)
+duréeTraitement = 2
+else
+duréeTraitement = 1
+endif
+endif
+endif
+endif
+endif
+------
