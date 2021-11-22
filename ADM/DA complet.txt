@@ -1,0 +1,225 @@
+Structures : 
+Client { statut, duréeAttente, duréeTraitement}
+Stations { clients }
+File { Clients }
+
+module(simulationFileAttente;γPrioritaire,γOrdinaire,a,c,m,x0;nbStationsOptimal)
+---* simulationFileAttente
+nbStations = nbStationsMin
+do while(nbStations <= nbStationsMax)
+longueurFile = 0
+duréeTotaleClientOrdinaire = 0
+duréeTotaleClientPrioritaire = 0
+duréeTotaleClientAbsolu = 0
+fileCumulée = 0 // A voir avec FE
+module(initStation;;stations)
+temps = 1
+do while (temps <= tempsSimulation)
+// Incrémenter durée totale des clients selon leur type + Retirer de la file les clients trop impatients
+module(gestionImpatience; file, longueurFile; file, longueurFile)
+// Générer x ordinaires, y relatifs selon les params poisson
+module(genererNouveauxClients;γPrioritaire,γOrdinaire,a,c,m,x0;clients,nbArrivées,x0)
+longueurFile += nbArrivées
+ind = 0
+// Trier la file avec les nouveaux clients > (prio >>> normaux)
+module(gestionFile;file, longueurFile, clients, nbArrivée;file, longueurFile)
+// Mettre les clients prio en station, et gérer les clients ejectés
+module(gestionClientPrioritaire;stations, nbStations, file, longueurFile;stations, file)
+do while(ind < nbStations)
+if(stations[ind] == 0)
+if(longieurFile != 0) 
+longueurFile --
+module(genererDuréeTraitement;a,c,m,x0;duréeTraitement,x0)
+stations[ind].duréeTraitement = duréeTraitement
+module(avancerFile;file;file)
+stations[ind].duréeTraitement -- // On accéde à durée trt de client contenu dans stations
+endif
+else
+stations[ind].duréeTraitement -- // idem
+endif
+ind ++
+enddo
+fileCumulée += file
+temps ++
+endif
+couts[nbStations - nbStationsMin] = A * nbStations * B * fileCumulée / tempsSimulation // A adapter
+nbStations ++
+enddo 
+module(rechercheCoutMin;couts, nbStationsMin, nbStationsMax;nbStationsOptimal)
+------
+
+// gérer les incr sur les durées totale => Parcourir la file après la gestion impatience
+// incr de 1 dans bonne catégorie en parcourant file
+module(gestionImpatience; file, longueurFile; file, longueurFile)
+---* gestionImpatience
+iFile = 0
+do while (iFile < longueurFile)
+file[iFile].duréeAttente ++
+
+if(file[iFile].statut == "ordinaire")
+duréeTotaleClientOrdinaire ++
+else if(file[iFile].statut == "prio_relatif")
+duréeTotaleClientPrioritaire ++
+else
+duréeTotaleClientAbsolu ++
+endif
+if(file[iFile].duréeAttente >= 10 && iFile >= 3)
+module(supprimerClient;iFile, file, longueurFile;file, longueurFile)
+endif
+iFile ++
+enddo
+------
+
+// Créer une liste de clients qui contient les clients ordinaires et prioritaires générés
+module(genererNouveauxClients;γPrioritaire,γOrdinaire,a,c,m,x0;clients,nbArrivées,x0)
+---* generationTypeClient
+clients = []
+module(générerNbArrivées;γ,a,c,m,x0;nbArrivéesClientsOrdinaires,x0)
+module(générerNbArrivées;γ,a,c,m,x0;nbArrivéesClientsPrioritaires,x0)
+nbAbsolus = nbArrivéesClientsPrioritaires * 0.3
+nbRelatifs = nbArrivéesClientsPrioritaires - nbAbsolus
+i = 0
+do while (i < nbAbsolus )
+client.statut = "absolu"
+client.duréeAttente = 0
+clients.append(client)
+i++
+enddo
+i = 0
+do while (i < nbRelatifs )
+client.statut = "relatif"
+client.duréeAttente = 0
+clients.append(client)
+i++
+enddo
+i = 0
+do while (i < nbArrivéesClientsOrdinaires)
+client.statut = "ordinaire"
+client.duréeAttente = 0
+clients.append(client)
+i++
+enddo
+nbArrivées = nbArrivéesClientsOrdinaires + nbArrivéesClientsPrioritaires
+------
+
+module(générerNbArrivées;γ,a,c,m,x0;nbArrivées,x0)
+---* générerNbArrivées
+module(générationNombreAléatoire;a,c,m,x0;x1)
+u1 = x1 / m
+x0 = x1
+k = 0
+fx = 0
+do
+module(loiPoisson;k,γ;probabilité)
+fx += probabilité
+k++
+enddo while (u1 >= fx)
+nbArrivées = k - 1
+------
+
+module(générationNombreAléatoire;a,c,m,x0;x1)
+---* générationNombreAléatoire
+x1 = (a * x0 + c) % m
+------
+
+module(loiPoisson;k,γ;probabilité)
+---* loiPoisson
+probabilité = ((e^-γ) * (γ^k)) / k!
+------
+
+// Ajouter et trier la file avec les nouveaux clients > (prio >>> normaux)
+module(gestionFile;file, longueurFile, clients, nbArrivée;file, longueurFile)
+---* gestionFile
+iArrivée = 0
+do while(iArrivée < nbArrivée)
+module(ajoutClientFile;clients, file, longueurFile;clients, file, longueurFile)
+enddo
+------
+
+module(gestionClientPrioritaire;stations, nbStations, file, longueurFile;stations, file)
+---* gestionClientPrioritaire
+iClient = 0
+clientsEjectés = []
+nbClientsEjectés = 0
+do while (iClient < longueurFile AND file[iClient].statut == "absolu")
+tempsTraitementMax = LV
+numStationMax = -1
+iStation = 0
+do while (iStation < nbStations)
+if (stations[iStation].statut == "ordinaire" and stations[iStation].duréeTraitement > tempsTraitementMax)
+numStationMax = iStation
+tempsTraitementMax = stations[iStation].duréeTraitement
+endif
+enddo
+if (numStation != -1)
+module(genererDuréeTraitement;a,c,m,x0;duréeTraitement,x0)
+clientsEjectés.append(stations[numStation])
+stations[numStation] = file[iClient]
+stations[numStation].duréeTraitement = duréeTraitement
+nbClientsEjectés++
+endif
+iClient++
+enddo
+iClientEjecté = 0
+do while (iClientEjecté < nbClientsEjectés)
+file[iClientEjecté] = clientsEjectés[iClientEjecté]
+iClientEjecté++
+enddo
+------
+
+module(genererDuréeTraitement;a,c,m,x0;duréeTraitement,x0)
+---* genererDuréeTraitement
+module(générationNombreAléatoire;a,c,m,x0;x1)
+u1 = x1 / m
+x0 = x1
+proba = 2 / 62
+if (u1 < proba)
+duréeTraitement = 6
+else
+proba += 3 / 62
+if (u1 < proba)
+duréeTraitement = 5
+else
+proba += 4 / 62
+if (u1 < proba)
+duréeTraitement = 4
+else
+proba += 11 / 62
+if (u1 < proba)
+duréeTraitement = 3
+else
+proba += 18 / 62
+if (u1 < proba)
+duréeTraitement = 2
+else
+duréeTraitement = 1
+endif
+endif
+endif
+endif
+endif
+------
+
+// supprimer le premier client de la file
+module(avancerFile;file;file)
+---* avancerFile
+iFile = 0
+module(copieClientVersStation;stations, file, iFile;stations)
+module(supprimerClient;iFile, file, longueurFile;file, longueurFile)
+------
+
+module(rechercheCoutMin;couts, nbStationsMin, nbStationsMax;nbStationsOptimal)
+---* rechercheCoutMin
+iFinCout = nbStationsMax - nbStations
+iCout = 0
+coutMin = HV
+iCoutMin = -1
+do while(iCout < iFinCout)
+if(couts[iCout] < coutMin)
+iCoutMin = iCout
+coutMin = couts[iCout]
+endif
+iCout ++
+enddo
+nbStationsOptimal = iCoutMin + nbStationsMin // Voir l'accès au tableau dans le calcul de la FE dans le main si pas clair
+------
