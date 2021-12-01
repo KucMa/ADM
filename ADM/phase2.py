@@ -1,6 +1,7 @@
 from math import exp, factorial
 from random import randint
 from enum import IntEnum
+import sys
 
 class StatusClient(IntEnum):
     ORDINAIRE = 1
@@ -93,4 +94,41 @@ def nouveaux_clients(v_prioritaire, v_ordinaire, a, c, m, x0):
         clients.append(Client(StatusClient.ORDINAIRE))
 
     return (clients, nb_arrivées, x0)
+
+def gestion_file(file, clients):
+    dernier_absolu = len(file) - 1 - file[::-1].index(StatusClient.ABSOLU)
+    dernier_relatif = len(file) - 1 - file[::-1].index(StatusClient.RELATIF)
     
+    for client in clients:
+        if client.status == StatusClient.ABSOLU:
+            dernier_absolu += 1
+            dernier_relatif += 1
+            file.insert(client, dernier_absolu)
+        elif client.status == StatusClient.RELATIF:
+            dernier_relatif += 1
+            file.insert(client, dernier_relatif)
+        else:
+            file.append(client)
+
+def gestion_clients_prioritaire(stations, file, a, c, m, x0):
+    clients_éjectés = []
+    iClient = 0
+
+    while iClient < len(file and file[iClient].status == StatusClient.ABSOLU):
+        temps_traitement_max = sys.maxsize
+        num_station_max = -1
+        for station in stations:
+            if station.status == StatusClient.ORDINAIRE and station.durée_traitement > temps_traitement_max:
+                num_station_max = stations.index(station)
+                temps_traitement_max = station.durée_traitement
+
+        if num_station_max != -1:
+            clients_éjectés.append(stations[num_station_max])
+            stations[num_station_max] = file[iClient]
+            stations[num_station_max].durée_traitement, x0 = durée_traitement(a, c, m, x0)
+
+        iClient += 1
+    
+    i_client_éjecté = 0
+    for client in clients_éjectés:
+        file.insert(client, i_client_éjecté)
