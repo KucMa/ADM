@@ -1,5 +1,5 @@
 from math import exp, factorial
-from random import randint
+from random import randint, random
 from enum import IntEnum
 import sys
 
@@ -11,7 +11,7 @@ class StatusClient(IntEnum):
 class Client:
     def __init__(self, status):
         self.status = status
-        self.durée_traitement = None
+        self.durée_traitement = 0
         self.durée_attente = 0
         
 def loi_poisson(k, v):
@@ -77,13 +77,22 @@ def gestion_impatience(file, durée_totale_client_ordinaire, durée_totale_clien
             file.remove(client)
         pos_file += 1
 
+    return (durée_totale_client_ordinaire, durée_totale_client_absolu, durée_totale_client_relatif)
+
 def nouveaux_clients(v_prioritaire, v_ordinaire, a, c, m, x0):
     clients = []
 
     nb_ordinaires, x0 = générer_nb_arrivées(a, c, m, x0, v_ordinaire)
     nb_prioritaires, x0 = générer_nb_arrivées(a, c, m, x0, v_prioritaire)
-    nb_absolus = int(nb_prioritaires * .3)
-    nb_relatifs = nb_prioritaires - nb_absolus
+    nb_absolus = 0
+    nb_relatifs = 0
+
+    for i in range(nb_prioritaires):
+        if random < .3:
+            nb_absolus += 1
+        else:
+            nb_relatifs += 1
+    
     nb_arrivées = nb_ordinaires + nb_relatifs + nb_absolus
 
     for i in range(len(nb_absolus)):
@@ -115,9 +124,13 @@ def gestion_clients_prioritaire(stations, file, a, c, m, x0):
     iClient = 0
 
     while iClient < len(file and file[iClient].status == StatusClient.ABSOLU):
+
         temps_traitement_max = sys.maxsize
         num_station_max = -1
         for station in stations:
+            if station.status is None:
+                num_station_max = station.index(station)
+                break;
             if station.status == StatusClient.ORDINAIRE and station.durée_traitement > temps_traitement_max:
                 num_station_max = stations.index(station)
                 temps_traitement_max = station.durée_traitement
@@ -132,3 +145,26 @@ def gestion_clients_prioritaire(stations, file, a, c, m, x0):
     i_client_éjecté = 0
     for client in clients_éjectés:
         file.insert(client, i_client_éjecté)
+
+def simulation_file_attente(v_prioritaire, v_ordinaire, a, c, m, x0, nb_stations_min, nb_stations_max, temps_simulation):
+    for nb_stations in range(nb_stations_min, nb_stations_max):
+        durée_totale_client_absolu = 0
+        durée_totale_client_ordinaire = 0
+        durée_totale_client_relatif = 0
+        stations = [Client(None) for _ in range(nb_stations)]
+        file = []
+
+        for temps in range(temps_simulation):
+            durée_totale_client_ordinaire, durée_totale_client_absolu, durée_totale_client_relatif = gestion_impatience(file, durée_totale_client_ordinaire, durée_totale_client_absolu, durée_totale_client_relatif)
+            clients, nb_arrivées, x0 = nouveaux_clients(v_prioritaire, v_ordinaire, a, c, m, x0)
+            gestion_file(file, clients)
+            gestion_clients_prioritaire(stations, file, a, c, m, x0)
+
+            for station in stations:
+                if station.status is None:
+                    if len(file) != 0:
+                        durée_traitement, x0 = durée_traitement(a, c, m, x0)
+                        station = file.pop(0)
+                        station.durée_traitement = durée_traitement - 1
+                else:
+                    station.durée_traitement -= 1
