@@ -1,94 +1,53 @@
-from math import gcd
-import math
-from os import listdir
+from math import gcd, pi, acos, sqrt
 
 FICHIER = open("test_carree_unite.txt","w")
 
-class Random_number_generator :
-        
-    
-        def __init__(self, module_m, multiplier_a, increment_c, x_zero) :
-            self.module_m = module_m
-            self.multiplier_a = multiplier_a
-            self.increment_c = increment_c
-            self.x_zero = x_zero
-            self.xn_random_numbers = self.__generate_random_sequence()
-            self.un_random_numbers = self.__convert_to_u_n()
-            self.yn_random_numbers = self.__convert_to_y_n() 
+def xn(m, a, c, x0):
+    xn = [x0]
+    x1 = (a * x0 + c) % m
+    while (x1 != x0):
+        xn.append(x1)
+        x1 = (a * x1 + c) % m
+    return xn
 
-        ##PRIVATE METHODS##
+def facteurs_premiers(nb):
+    facteurs_premiers = []
+    div = 2
+    while nb % div == 0:
+        facteurs_premiers.append(div)
+        nb = int(nb / div)
+    div = 3
+    while div <= nb:
+        while nb % div == 0:
+            facteurs_premiers.append(div)
+            nb = int(nb / div)
+        div = div + 2
+    return facteurs_premiers
 
-        def __generate_random_sequence(self) :
-            xn_random_numbers = []
-            xn_random_numbers.append(self.x_zero)
+un = lambda m, a, c, x0 : [x / m for x in xn(m, a, c, x0)]
+yn = lambda m, a, c, x0 : [int(x * 10) for x in un(m, a, c, x0)]
+est_multiple = lambda multiple_to_test, nb: multiple_to_test % nb == 0
 
-            new_term = (self.multiplier_a * self.x_zero + self.increment_c) % self.module_m
+def a_periode_max(a, c, m):
+    if gcd(m, c) != 1:
+        return False
+    if not all(map(lambda x: est_multiple(a - 1, x), facteurs_premiers(m))):
+        return False
+    if est_multiple(m, 4) and not est_multiple(a - 1, 4):
+        return False
+    return True
 
-            while new_term != self.x_zero :
-                xn_random_numbers.append(new_term)
-                prev_term = new_term
-                new_term = (self.multiplier_a * prev_term + self.increment_c) % self.module_m
+def valeurs_pour_périodes_max(m):
+    c = 2
+    a = 2
+    while c < m and not a_periode_max(a, c, m):
+        while a < m and not a_periode_max(a, c, m):
+            a += 1
+        if not a_periode_max(a, c, m):
+            c += 1
+            a = 2
+    return a, c
 
-            return xn_random_numbers
-
-        def __prime_factor(self, nb) :
-            result = []
-            div = 2
-
-            while nb % div == 0:
-                result.append(div)
-                nb = int(nb / div)
-            div = 3
-
-            while div <= nb:
-                while nb % div == 0:
-                    result.append(div)
-                    nb = int(nb / div)
-
-                div = div + 2
-            return result
-
-        def __is_multiple(self, multiple, nb):
-            return multiple % nb == 0
-
-        def __convert_to_u_n (self) :
-            return list(map(lambda x : x / self.module_m, self.xn_random_numbers))
-        
-        def __convert_to_y_n (self) : 
-            return list(map(lambda x : int(x * 10), self.un_random_numbers))
-            
-        ##PUBLIC METHODS##
-        
-        def display_xn(self) :
-            for nb in self.xn_random_numbers:
-                print(nb)
-        
-        def display_un(self) :
-            for nb in self.un_random_numbers:
-                print(nb)
-
-        def display_yn(self) :
-            for nb in self.yn_random_numbers:
-                print(nb)
-
-        def period_length(self):
-            return len(self.xn_random_numbers)
-
-        def is_max_period_length(self) :
-            if gcd(self.module_m, self.increment_c) != 1:
-                return False
-            
-            if not all(map(lambda x : self.__is_multiple(self.multiplier_a - 1, x), self.__prime_factor(self.module_m))):
-                return False
-
-            if self.__is_multiple(self.module_m, 4):
-                if not self.__is_multiple(self.multiplier_a - 1, 4):
-                    return False
-            
-            return True
-        
-        ##Carre unite
-    
 def test_carré_unité(liste_yn):
 
     FICHIER.write("Test du Carrée unitée \n")
@@ -180,9 +139,9 @@ def test_carré_unité(liste_yn):
             x = float(tableauTest[i][0])
 
             if x <= 1:
-                tableauTest[i][2] = (math.pi*x)-((8/3)*(x**(3/2)))+((x**2)/2)
+                tableauTest[i][2] = (pi*x)-((8/3)*(x**(3/2)))+((x**2)/2)
             else:
-                tableauTest[i][2] = (1/3)+((math.pi-2)*x)+(4*(x-1)**(1/2))+((8/3)*(x-1)**3/2)-((x**2)/2)-(4*x*math.acos(1/(math.sqrt(x))))
+                tableauTest[i][2] = (1/3)+((pi-2)*x)+(4*(x-1)**(1/2))+((8/3)*(x-1)**3/2)-((x**2)/2)-(4*x*acos(1/(sqrt(x))))
 
             for y in range((i-1),-1,-1):
                 tableauTest[i][2] -= tableauTest[y][2]
@@ -224,10 +183,11 @@ def test_carré_unité(liste_yn):
     print("Ki2 Obs : "+  str(ki2_obs))
 
         
-def carreUnite(liste_yn):
-    display_yn(liste_yn)
-
+def carre_unité(liste_yn):
+    print(liste_yn)
     test_carré_unité(liste_yn)
 
-def generate_liste_of_random_number(m, a, c, x0):
-    
+if __name__ == "__main__":
+    m = 1000
+    a, c = valeurs_pour_périodes_max(m)
+    carre_unité(yn(m, a, c, 5))
