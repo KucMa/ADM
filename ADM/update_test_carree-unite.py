@@ -90,7 +90,7 @@ def regroupement(tableau_continu):
     tableau_continu["ri"][index] += tableau_continu["ri"][i]
     tableau_continu["npi"][index] += tableau_continu["npi"][i]
     tableau_continu["pi"][index] += tableau_continu["pi"][i]
-    tableau_continu["(ri-npi)²/npi"][index] = (tableau_continu["ri"][i] - tableau_continu["npi"][i])**2 / tableau_continu["npi"][i]
+    tableau_continu["(ri-npi)²/npi"][index] = (tableau_continu["ri"][index] - tableau_continu["npi"][index])**2 / tableau_continu["npi"][index]
     tableau_continu["Xi"]["Début"].pop(i)
     tableau_continu["Xi"]["Fin"].pop(i)
     tableau_continu["ri"].pop(i)
