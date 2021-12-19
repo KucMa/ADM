@@ -136,15 +136,6 @@ def test_carré_unité(un):
         if tableau["npi"][y] != 0:
             tableau["(ri-npi)²/npi"][y] =  (tableau["ri"][y] - tableau["npi"][y])**2 / tableau["npi"][y]
 
-    df = pd.DataFrame()
-    
-    df.insert(0, "Début", tableau["Xi"]["Début"])
-    df.insert(1, "Fin", tableau["Xi"]["Fin"])
-    df.insert(2, "ri", tableau["ri"])
-    df.insert(3, "pi", tableau["pi"])
-    df.insert(4, "npi", tableau["npi"])
-    df.insert(5, "(ri-npi)²/npi", tableau["(ri-npi)²/npi"])
-
     FICHIER.write("-" * 50)
     FICHIER.write("\n")
     FICHIER.write("---TABLEAU AVANT REGROUPEMENT---\n")
