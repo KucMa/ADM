@@ -70,6 +70,36 @@ def pi_test_carré_unité():
 
     return probabilités
 
+def regroupement(tableau_continu):
+    if (all(map(lambda x : x >= 5, tableau_continu["npi"]))):
+        return tableau_continu
+    n = sum(tableau_continu["ri"])
+    i = 0
+    while i < len(tableau_continu["npi"]) and tableau_continu["npi"][i] > 5:
+        i += 1
+
+    if i != 0 and i != len(tableau_continu["npi"]) - 1:
+        index = tableau_continu["npi"].index(min(tableau_continu["npi"][i - 1], tableau_continu["npi"][i + 1]))
+    elif i == 0:
+        index = 1
+    else:
+        index = len(tableau_continu["npi"]) - 2
+
+    tableau_continu["Xi"]["Début"][index] = tableau_continu["Xi"]["Début"][i] if i < index else tableau_continu["Xi"]["Début"][index]
+    tableau_continu["Xi"]["Fin"][index] = tableau_continu["Xi"]["Fin"][i] if i > index else tableau_continu["Xi"]["Fin"][index]
+    tableau_continu["ri"][index] += tableau_continu["ri"][i]
+    tableau_continu["npi"][index] += tableau_continu["npi"][i]
+    tableau_continu["pi"][index] += tableau_continu["pi"][i]
+    tableau_continu["(ri-npi)²/npi"][index] = (tableau_continu["ri"][i] - tableau_continu["npi"][i])**2 / tableau_continu["npi"][i]
+    tableau_continu["Xi"]["Début"].pop(i)
+    tableau_continu["Xi"]["Fin"].pop(i)
+    tableau_continu["ri"].pop(i)
+    tableau_continu["pi"].pop(i)
+    tableau_continu["npi"].pop(i)
+    tableau_continu["(ri-npi)²/npi"].pop(i)
+
+    regroupement(tableau_continu)
+
 def test_carré_unité(un):
 
     FICHIER.write("Test du Carrée unitée \n")
@@ -85,9 +115,6 @@ def test_carré_unité(un):
         "(ri-npi)²/npi" : [None for _ in range(20)]
     }
 
-    n = 0
-    ki2_obs = 0
-
     for i in range(0, len(un), 4):
         u0 = un[i]
         u1 = un[i + 1]
@@ -98,7 +125,6 @@ def test_carré_unité(un):
             break;
 
         dist = (u3 - u1)**2 + (u2 - u0)**2
-        n += 1
 
         for y in range(len(tableau["ri"])):
             if dist >= tableau["Xi"]["Début"][y] and tableau["Xi"]["Fin"][y] > dist:
@@ -119,14 +145,37 @@ def test_carré_unité(un):
     df.insert(4, "npi", tableau["npi"])
     df.insert(5, "(ri-npi)²/npi", tableau["(ri-npi)²/npi"])
 
-    FICHIER.write("TABLEAU AVANT REGROUPEMENT\n")
-    FICHIER.write(str(df))
+    FICHIER.write("-" * 50)
+    FICHIER.write("\n")
+    FICHIER.write("---TABLEAU AVANT REGROUPEMENT---\n")
+    save_tableau(tableau, FICHIER)
+    regroupement(tableau)
+    FICHIER.write("-" * 50)
+    FICHIER.write("\n")
+    FICHIER.write("---TABLEAU APRES REGROUPEMENT---\n")
+    save_tableau(tableau, FICHIER)
 
-       
+    FICHIER.write("-" * 50)
+    FICHIER.write("\n")
 
-        
+    FICHIER.write("n: " + str(sum(tableau["ri"])) + "\n")
+    FICHIER.write("Ki2 Obs : " + str(sum(tableau["(ri-npi)²/npi"])) + "\n")
+    FICHIER.write("Calcul du nombre de degrés de liberté : " + str(len(tableau["ri"]) - 1) + "\n")
+    FICHIER.write("Il faut chercher le ki² avec le bon alpha et le bon degré de libérté dans la table\n")
+    FICHIER.write("Conclusion : \n")
+
+
+
+def save_tableau(tableau, fichier):
+    df = pd.DataFrame()
+    df.insert(0, "Début", tableau["Xi"]["Début"])
+    df.insert(1, "Fin", tableau["Xi"]["Fin"])
+    df.insert(2, "ri", tableau["ri"])
+    df.insert(3, "pi", tableau["pi"])
+    df.insert(4, "npi", tableau["npi"])
+    df.insert(5, "(ri-npi)²/npi", tableau["(ri-npi)²/npi"])
+    fichier.write(str(df) + "\n")
 def carre_unité(un):
-    #print(un)
     test_carré_unité(un)
 
 if __name__ == "__main__":
