@@ -274,11 +274,12 @@ def simulation_file_attente(v_prioritaire, v_ordinaire, a, c, m, x0, nb_stations
         (COUT_PRESENCE_SYSTEME_RELATIF * duree_totale_client_relatif) +
         (COUT_PRESENCE_SYSTEME_ORDI * duree_totale_client_ordinaire))
 
+        couts.append(cout)
         if cout_min > cout:
             cout_min = cout
             nb_stations_optimal = nb_stations
 
-    return nb_stations_optimal
+    return nb_stations_optimal, couts
 
 
 def afficher_arrivees(clients):
@@ -337,10 +338,10 @@ def afficher_file(file):
     
 
 if __name__ == "__main__":
-    a = 121
-    c = 789
-    m = 15000
-    x0 = 25
+    a = 146
+    c = 112
+    m = 3625
+    x0 = 1
     Ci = [1,2,3,4,5,6]
     ri = [24,18,11,4,3,2]
     DS = esperance(Ci, ri)
@@ -359,6 +360,9 @@ if __name__ == "__main__":
             ri.append(1)
 
     𝜆 = esperance(Ci, ri)
-    nb_stations_optimal = simulation_file_attente(0.7,2,a,c,m,x0,nombre_stations_minimun(𝜆, DS), 50, 600)
+    nb_stations_optimal, couts = simulation_file_attente(0.7,2,a,c,m,x0, 6, 56, 600)
 
     print("Nombre de stations optimale : " + str(nb_stations_optimal))
+
+    for i in range(len(couts)):
+        print(str(i + ) + " STATIONS : " + str(couts[i]))
