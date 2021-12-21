@@ -1,0 +1,339 @@
+// Structures : 
+// Client { statut, duréeAttente, duréeTraitement}
+// Stations { Clients } Liste de clients
+// File { Clients } Liste de clients
+// ClientsPerdus {Clients} Liste de clients
+// NouveauxClients { Clients } Liste de clients
+couts tableaux de couts
+
+// Constantes
+COUT_PRESENCE_SYSTEME_ORDI = 25 / 60
+COUT_PRESENCE_SYSTEME_RELATIF = 35 / 60
+COUT_PRESENCE_SYSTEME_ABSOLU = 45 / 60
+COUT_OCCUPATION_ORDI = 30 / 60
+COUT_OCCUPATION_PRIO = 32 / 60
+COUT_INOCCUPATION = 18 / 60
+COUT_PERTE_CLIENT_ORDI = 15
+COUT_PERTE_CLIENT_PRIO = 20
+
+module(contientClientStatut;clients, nbClient, statut;contientClient)
+---* contientClientStatut
+iClient = 0
+contientClient = False
+do while(iClient < nbClient)
+if(clients[iClient].statut == statut)
+contientClient = True // Quitter via un return pour optimiser dans ce cas-ci 
+endif
+enddo
+------
+
+module(esperance; ci, ri, longueurTableau; esperance)
+---* esperance
+iTableau = 0
+sommeCiRi = 0
+sommeRi = 0
+do while(iTableau < longueurTableau)
+sommeCiRi += ci[iTableau] * ri[iTableau]
+sommeRi =+ ri[iTableau]
+enddo
+esperance = sommeCiRi / sommeRi
+------
+
+module(dernierClientStatut; listeClients, statut; index) // La liste est trier par statut client
+---* dernierClientStatut
+index = 0
+nbClients = longueur de la file 
+do while index < nbClients and listeClients[index].statut == statut:
+index += 1
+enddo
+------
+
+module(loiPoisson;k,v;probabilitéPoisson)
+---* loiPoisson
+probabilitéPoisson = (e**-v) * (v**k) / k!
+------
+
+module(nombreStationMinimum;𝜆, DS;nbStationMin)
+---* nombreStationMinimum
+nbStationMinimum = (𝜆 * DS) // Arrondir au supérieur
+------
+
+module(nombreAleatoire;a,c,m,x0;nombreAleat)
+---* nombreAleatoire
+nombreAleat = (x * x0 + c) % m
+------
+
+module(genererNbArrivées;a,c,m,x0,v;k, x0)
+---* genererNbArrivées
+module(nombreAleatoire;a, c, m, x0;x1)
+x0 = x1
+u1 = x1 / m
+k = 0
+module(loi_poisson;k, v;probabilité)
+do while (u1 >= probabilité)
+k += 1
+module(loiPoisson;k,v;probabilité)
+enddo
+------
+
+module(duréeTraitement;a,c,m,x0;duréeTraitement, x1)
+---* duréeTraitement
+module(nombreAleatoire;a,c,m,x0;x1)
+u1 = x1/ m
+
+if (u1 < 2/62)
+duréeTraitement = 6
+elseif (u1 < 5/62)
+duréeTraitement = 5
+elseif (u1 < 9/62)
+duréeTraitement = 4
+elseif (u1 < 20/62)
+duréeTraitement = 3
+elseif (u1 < 38/62)
+duréeTraitement = 2
+else
+duréeTraitement = 1
+endif
+------
+
+module(gestionImpatience;file, longueurFile, duréeTotaleClientOrdinaire, duréeTotaleClientAbsolu, duréeTotaleClientRelatif;file, longueurFile, duréeTotaleClientOrdinaire, duréeTotaleClientAbsolu, duréeTotaleClientRelatif, clientsPerdus)
+---* gestionImpatience
+clientsPerdus = []
+pos_file = 0 
+iClientPerdu = 0
+do while (pos_file < longueurFile)
+file[pos_file].duree_attente += 1
+if (file[pos_file].statut == "ABSOLU")
+duréeTotaleClientAbsolu += 1
+else if file[pos_file].statut == "RELATIF":
+duréeTotaleClientRelatif += 1
+else:
+duréeTotaleClientOrdinaire += 1
+endif
+if (file[pos_file].duree_attente >= 10 and pos_file > 3)
+clientsPerdus[iClientPerdu] = file[pos_file]
+iClientPerdu ++
+endif
+pos_file += 1
+enddo
+longueurPerdu = iClientPerdu
+iClientPerdu = 0
+do while (iClientPerdu < longueurPerdu)
+supprimer client de la file // Python
+enddo
+------
+
+module(nouveauxClients;vPrioritaire, vOrdinaire, a, c, m, x0;clients, x0)
+---* nouveauxClients
+module(genererNbArrivées;a,c,m,x0,vOrdinaire;nbOrdinaire, x0)
+
+module(genererNbArrivées;a,c,m,x0,vPrioritaire;nbPrioritaire, x0)
+nbAbsolu = 0
+nbRelatif = 0
+
+iPrioritaire = 0
+do while (iPrioritaire < nbPrioritaire)
+nombreAléatoire = generer nombre aléatoire [0;1]
+if nombreAléatoire < 0.3)
+nbAbsolu ++
+else
+nbRelatif ++
+endif
+iPrioritaire++
+enddo
+
+nbArrivées = nbOrdinaire + nbRelatif + nbAbsolu
+iNouvClient = 0
+iAbsolu = 0
+do while(iAbsolu < nbAbsolu)
+créer nouvClient
+nouvClient.duréeAttente = 0
+NouvClient.duréeTraitement = null
+nouvClient.Statut = "ABSOLU"
+nouveauxClients[iNouvClient] = nouvClient
+iAbsolu ++
+iNouvClient ++
+enddo
+
+iRelatif = 0
+do while(iRelatif < nbRelatif)
+créer nouvClient
+nouvClient.duréeAttente = 0
+NouvClient.duréeTraitement = null
+nouvClient.Statut = "RELATIF"
+nouveauxClients[iNouvClient] = nouvClient
+iRelatif ++
+iNouvClient ++
+enddo
+iOrdinaire = 0
+do while(iOrdinaire < nbOrdinaire)
+créer nouvClient
+nouvClient.duréeAttente = 0
+NouvClient.duréeTraitement = null
+nouvClient.Statut = "ORDINAIRE"
+nouveauxClients[iNouvClient] = nouvClient
+iOrdinaire ++
+iNouvClient ++
+enddo
+------
+
+
+module(gestionFile;file, longueurFile, clients, longueurClient;file, longueurFile)
+---* gestionFile
+module(contientClientStatut;file, longueurFile, "ABSOLU";contientClientAbsolu)
+
+if (contientClientAbsolu)
+module(dernierClientStatut; file, "ABSOLU"; dernierAbsolu)
+else:
+dernierAbsolu = 0
+endif
+module(contientClientStatut;file, longueurFile, "RELATIF";contientClientRelatif)
+if (contientClientRelatif)
+module(dernierClientStatut; file, "RELATIF"; dernierRelatif)
+else 
+if(dernierAbsolu == 0)
+dernierRelatif = 0
+else
+dernierRelatif = dernierAbsolu + 1
+endif
+endif
+ 
+iClient = 0
+do while(iClient < longueurClients)
+if(file[iFile].statut = "ABSOLU")
+insérer client après le dernier client absolu
+dernierAbsolu ++
+dernierRelatif++
+else if(file[iFile].statut = "RELATIF")
+insérer client après le dernier client relatif
+dernierRelatif++
+else
+insérer client à la fin de la file
+endif
+enddo
+------
+
+module(gestionClientsPrioritaire;stations, nbStation, file, longueurFile, a, c, m, x0; file, longueurFile)
+---* gestionClientsPrioritaire
+Déclarer tableau clientsEjectes
+iClient = 0
+nbClientEjecté = 0
+do while (iClient < longueurFile) and file[iClient].statut == "ABSOLU")
+tempsTraitementMax = LV
+nbStationMax = LV
+iStation = 0
+
+do while(iStation < nbStation)
+if(stations[iStation].statut == null) // On accéde au statut du client en station, cas station vide
+numStationMax = iStation
+longueurFile -- 
+else if(stations[iStation].statut == "ORDINAIRE" and station[iStation].duree_traitement > temps_traitement_max) // Cas client ordinaire en station
+numStationMax = iStation
+temps_traitement_max = station[iStation].dureeTraitement
+endif
+iStation++
+enddo
+
+if(numStationMax != -1)
+if(stations[numStationMax].statut != null)
+clientsEjectes[iClientEject] = station[numStationMax]
+nbClientEjecté ++
+endif
+stations[numStationMax] = file[iClient]
+module(duréeTraitement;a,c,m,x0;duréeTraitement, x0)
+station[numStationMax].dureeTraitement = duréeTraitement
+endif
+
+iClient ++
+enddo
+
+iClientEjecté = 0
+do while (iClientEjecté < nbClientEjecté)
+clientsEjectés[iClientEjecté].statut = "ABSOLU" // Python - Orienté object -> Les clients dans la file seront aussi affectés
+Insérer clientsEjectés[iClientEjecté] en début de file
+iClientEjecté ++
+enddo
+------
+
+module(simulationFileAttente;vPrioritaire, vOrdinaire, a, c, m, x0, nbStationsMin, nbStationsMax, tempsSimulation; nbStationsOptimal)
+---* simulationFileAttente
+coutMin = HV
+déclarer tableau couts
+nbStationOptimal = nbStationMin
+nbStation = nbStationMin
+
+do while(nbStation < nbStationMax)
+dureeTotaleClientAbsolu = 0
+dureeTotaleClientOrdinaire = 0
+dureeTotaleClientRelatif = 0
+dureeOccupationPrio = 0
+dureeOccupationOrdi = 0
+dureeInoccupation = 0
+clientsPrioPerdus = 0
+clientsOrdinairesPerdus = 0
+module(initStationsVides;stations, nbStation;stations)
+module(initFileVide;;file, longueurFile)
+
+do while(temps < tempsSimulation)
+module(gestionImpatience;file, longueurFile, duréeTotaleClientOrdinaire, duréeTotaleClientAbsolu, duréeTotaleClientRelatif;file, longueurFile, duréeTotaleClientOrdinaire, duréeTotaleClientAbsolu, duréeTotaleClientRelatif, clientsPerdus)
+
+iClientPerdu = 0
+nbClientPerdus = longueur clientsPerdus
+do while (iClientPerdu < nbClientPerdus)
+if(clientsPerdus[iClientPerdu].statut == "ORDINAIRE")
+clientsOrdinairePerdu ++
+else
+clientPrioPerdus ++
+endif
+enddo
+module(nouveauxClients;vPrioritaire, vOrdinaire, a, c, m, x0;clients, x0)
+longueurFile = taille file
+longueurClient = taille clients
+module(gestionFile;file, longueurFile, clients, longueurClient;file, longueurFile)
+module(gestionClientsPrioritaire;stations, nbStation, file, longueurFile, a, c, m, x0; file, longueurFile)
+
+iStation = 0
+do while(iStation < nbStation)
+if(stations[iStation].statut == null)
+if(longueurFile != 0)
+module(duréeTraitement;a,c,m,x0;duréeTraitement, x1)
+stations[iStation] = file[0]
+stations[iStation].dureeTraitement = dureeTraitement -1
+else
+dureeInoccupation ++
+endif
+else
+station[iStation].dureeTraitement --
+endif
+if(station[iStation].statut == "ABSOLU")
+dureeTotaleClientAbsolu ++
+dureeOccupationPrio++
+else if(station[iStation].statut = "RELATIF")
+dureeTotaleClientRelatif++
+dureeOccupationPrio++
+else
+dureeTotaleClientOrdinaire ++
+dureeOccupationOrdi++
+endif
+if(station[iStation].dureeTraitement == 0)
+station[istation].statut = null
+endif
+iStation ++
+enddo 
+temps ++
+enddo
+cout = (COUT_INOCCUPATION * dureeInoccupation) + 
+        (COUT_PERTE_CLIENT_ORDI * clientsOrdinairesPerdus) +
+        (COUT_PERTE_CLIENT_PRIO * clientsPrioPerdus) + 
+        (COUT_OCCUPATION_PRIO * dureeOccupationPrio) +
+        (COUT_OCCUPATION_ORDI * dureeOccupationOrdi) +
+        (COUT_PRESENCE_SYSTEME_ABSOLU * dureeTotaleClientAbsolu) +
+        (COUT_PRESENCE_SYSTEME_RELATIF * dureeTotale_clientRelatif) +
+        (COUT_PRESENCE_SYSTEME_ORDI * dureeTotaleClientOrdinaire))
+if(coutMin > cout)
+coutMin = cout
+nbStationOptimal = nbStation
+endif
+nbStation++
+enddo
+------
