@@ -13,6 +13,16 @@ COUT_OCCUPATION_PRIO = 32 / 60
 COUT_INOCCUPATION = 18 / 60
 COUT_PERTE_CLIENT_ORDI = 15
 COUT_PERTE_CLIENT_PRIO = 20
+V_PRIORITAIRE = 0.7
+V_ORDINAIRE = 2
+PROPORTION_ABSOLU = 0.3
+
+class CoutsStation:
+    def __init__(self):
+        self.duree_occupation_absolu = 0
+        self.duree_occupation_relatif = 0
+        self.duree_occupation_ordinaire = 0 
+        self.duree_inoccupation = 0 
 
 class StatutClient(IntEnum):
     ORDINAIRE = 1
@@ -84,7 +94,7 @@ def duree_traitement(a, c, m, x0):
     return (duree_traitement, x1)
 
 
-def gestion_impatience(file, duree_totale_client_ordinaire, duree_totale_client_absolu, duree_totale_client_relatif):
+def gestion_impatience(file, couts):
     pos_file = 1
     clients_perdus = []
     
@@ -92,11 +102,14 @@ def gestion_impatience(file, duree_totale_client_ordinaire, duree_totale_client_
         client.duree_attente += 1
 
         if client.statut == StatutClient.ABSOLU:
-            duree_totale_client_absolu += 1
+            couts["duree_totale_client_absolu"] += 1
+            couts["duree_file_client_absolu"] += 1
         elif client.statut == StatutClient.RELATIF:
-            duree_totale_client_relatif += 1
+            couts["duree_totale_client_relatif"] += 1
+            couts["duree_file_client_relatif"] += 1
         else:
-            duree_totale_client_ordinaire += 1
+            couts["duree_totale_client_ordinaire"] += 1
+            couts["duree_file_client_ordinaire"] += 1
 
         if client.duree_attente >= 10 and pos_file > 3:
             clients_perdus.append(client)
@@ -105,7 +118,7 @@ def gestion_impatience(file, duree_totale_client_ordinaire, duree_totale_client_
     for client in clients_perdus:
         file.remove(client)
 
-    return (duree_totale_client_ordinaire, duree_totale_client_absolu, duree_totale_client_relatif, clients_perdus)
+    return (couts, clients_perdus)
 
 def nouveaux_clients(v_prioritaire, v_ordinaire, a, c, m, x0):
     clients = []
@@ -116,7 +129,10 @@ def nouveaux_clients(v_prioritaire, v_ordinaire, a, c, m, x0):
     nb_relatifs = 0
 
     for i in range(nb_prioritaires):
-        if random() < .3:
+        x1 = nombre_aleatoire(a, c, m, x0)
+        x0 = x1
+        u1 = x1 / m 
+        if u1 < PROPORTION_ABSOLU:
             nb_absolus += 1
         else:
             nb_relatifs += 1
@@ -187,17 +203,32 @@ def gestion_clients_prioritaire(stations, file, a, c, m, x0):
 
 def simulation_file_attente(v_prioritaire, v_ordinaire, a, c, m, x0, nb_stations_min, nb_stations_max, temps_simulation):
     cout_min = sys.maxsize
-    couts = []
     nb_stations_optimal = nb_stations_min
+
+    cout_station = {
+            "duree_occupation_absolu" : 0,
+            "duree_occupation_relatif" : 0,
+            "duree_occupation_ordinaire" : 0,
+            "duree_inoccupation" : 0,
+        }
+
     for nb_stations in range(nb_stations_min, nb_stations_max + 1):
-        duree_totale_client_absolu = 0
-        duree_totale_client_ordinaire = 0
-        duree_totale_client_relatif = 0
-        duree_occupation_prio = 0
-        duree_occupation_ordi = 0
-        duree_inoccupation = 0
-        clients_prio_perdus = 0
-        clients_ordinaires_perdus = 0
+        couts = {
+            "duree_totale_client_absolu" : 0,
+            "duree_totale_client_ordinaire" : 0,
+            "duree_totale_client_relatif" : 0,
+            "duree_file_client_absolu" : 0,
+            "duree_file_client_ordinaire" : 0,
+            "duree_file_client_relatif" : 0,
+            "duree_occupation_prio" : 0,
+            "duree_occupation_ordi" : 0,
+            "duree_inoccupation" : 0,
+            "clients_prio_perdus" : 0,
+            "clients_ordinaires_perdus" : 0,
+        }
+
+        couts_stations = [CoutsStation() for _ in range(nb_stations)]
+        
         stations = [Client(None) for _ in range(nb_stations)]
         file = []
 
@@ -209,13 +240,13 @@ def simulation_file_attente(v_prioritaire, v_ordinaire, a, c, m, x0, nb_stations
                 afficher_stations(stations)
                 afficher_file(file)
                 
-            duree_totale_client_ordinaire, duree_totale_client_absolu, duree_totale_client_relatif, clients_perdus = gestion_impatience(file, duree_totale_client_ordinaire, duree_totale_client_absolu, duree_totale_client_relatif)
+            couts, clients_perdus = gestion_impatience(file, couts)
             
             for client in clients_perdus:
                 if client.statut == StatutClient.ORDINAIRE:
-                    clients_ordinaires_perdus += 1
+                    couts["clients_ordinaires_perdus"] += 1
                 else:
-                    clients_prio_perdus += 1
+                    couts["clients_prio_perdus"] += 1
             
             clients, x0 = nouveaux_clients(v_prioritaire, v_ordinaire, a, c, m, x0)
 
@@ -239,19 +270,23 @@ def simulation_file_attente(v_prioritaire, v_ordinaire, a, c, m, x0, nb_stations
                         stations[iStation] = file.pop(0)
                         stations[iStation].duree_traitement = traitement - 1
                     else:
-                        duree_inoccupation += 1
+                        couts["duree_inoccupation"] += 1
+                        couts_stations[iStation].duree_inoccupation += 1
                 else:
                     stations[iStation].duree_traitement -= 1
 
                 if stations[iStation].statut == StatutClient.ABSOLU:
-                    duree_totale_client_absolu += 1
-                    duree_occupation_prio += 1
+                    couts["duree_totale_client_absolu"] += 1
+                    couts["duree_occupation_prio"] += 1
+                    couts_stations[iStation].duree_occupation_absolu += 1
                 elif stations[iStation].statut == StatutClient.RELATIF:
-                    duree_totale_client_relatif += 1
-                    duree_occupation_prio += 1
+                    couts["duree_totale_client_relatif"] += 1
+                    couts["duree_occupation_prio"] += 1
+                    couts_stations[iStation].duree_occupation_relatif += 1
                 else:
-                    duree_totale_client_ordinaire += 1
-                    duree_occupation_ordi += 1
+                    couts["duree_totale_client_ordinaire"] += 1
+                    couts["duree_occupation_ordi"] += 1
+                    couts_stations[iStation].duree_occupation_ordinaire += 1
 
                 if stations[iStation].duree_traitement == 0:
                     stations[iStation].statut = None
@@ -265,21 +300,55 @@ def simulation_file_attente(v_prioritaire, v_ordinaire, a, c, m, x0, nb_stations
                 afficher_stations(stations)
                 afficher_file(file)
 
-        cout = ((COUT_INOCCUPATION * duree_inoccupation) + 
-        (COUT_PERTE_CLIENT_ORDI * clients_ordinaires_perdus) +
-        (COUT_PERTE_CLIENT_PRIO * clients_prio_perdus) + 
-        (COUT_OCCUPATION_PRIO * duree_occupation_prio) +
-        (COUT_OCCUPATION_ORDI * duree_occupation_ordi) +
-        (COUT_PRESENCE_SYSTEME_ABSOLU * duree_totale_client_absolu) +
-        (COUT_PRESENCE_SYSTEME_RELATIF * duree_totale_client_relatif) +
-        (COUT_PRESENCE_SYSTEME_ORDI * duree_totale_client_ordinaire))
+        cout_total = ((COUT_INOCCUPATION * couts["duree_inoccupation"]) + 
+        (COUT_PERTE_CLIENT_ORDI * couts["clients_ordinaires_perdus"]) +
+        (COUT_PERTE_CLIENT_PRIO * couts["clients_prio_perdus"]) + 
+        (COUT_OCCUPATION_PRIO * couts["duree_occupation_prio"]) +
+        (COUT_OCCUPATION_ORDI * couts["duree_occupation_ordi"]) +
+        (COUT_PRESENCE_SYSTEME_ABSOLU * couts["duree_totale_client_absolu"]) +
+        (COUT_PRESENCE_SYSTEME_RELATIF * couts["duree_totale_client_relatif"]) +
+        (COUT_PRESENCE_SYSTEME_ORDI * couts["duree_totale_client_ordinaire"]))
 
-        if cout_min > cout:
-            cout_min = cout
+        afficher_couts(couts, nb_stations, couts_stations, cout_total)
+
+        if cout_min > cout_total:
+            cout_min = cout_total
             nb_stations_optimal = nb_stations
 
     return nb_stations_optimal
 
+
+def afficher_couts(couts, nb_stations, couts_stations, cout_total):
+    print("Cout de la simulation avec " + str(nb_stations) + " stations")
+    print("---" * 20)
+    print()
+    print("Cout total du systeme : " + str(cout_total))
+    print()
+    print("Les clients absolus en file ont coute : " + str(couts["duree_file_client_absolu"] * COUT_PRESENCE_SYSTEME_ABSOLU))
+    print("Les clients relatif en file ont coute : " + str(couts["duree_file_client_relatif"] * COUT_PRESENCE_SYSTEME_RELATIF))
+    print("Les clients ordinaire en file ont coute : " + str(couts["duree_file_client_ordinaire"] * COUT_PRESENCE_SYSTEME_ORDI))
+    print()
+    print("La perte de clients prioritaires a coute : " + str(couts["clients_prio_perdus"] * COUT_PERTE_CLIENT_PRIO))
+    print("La perte de clients ordinaire a coute : " + str(couts["clients_ordinaires_perdus"] * COUT_PERTE_CLIENT_ORDI))
+    print()
+    cout_file = (
+        couts["duree_file_client_absolu"] * COUT_PRESENCE_SYSTEME_ABSOLU + 
+        couts["duree_file_client_relatif"] * COUT_PRESENCE_SYSTEME_RELATIF +
+        couts["duree_file_client_ordinaire"] * COUT_PRESENCE_SYSTEME_ORDI +
+        couts["clients_prio_perdus"] * COUT_PERTE_CLIENT_PRIO + 
+        couts["clients_ordinaires_perdus"] * COUT_PERTE_CLIENT_ORDI
+        )
+    print("Le cout de la file est donc de : " + str(cout_file))
+    print()
+    print("Les couts pour chaque stations")
+    print()
+    for i in range(nb_stations):
+        print("Station " + str(i + 1) + " : ")
+        print("Cout pour les clients absolu : " + str(couts_stations[i].duree_occupation_absolu * COUT_OCCUPATION_PRIO))
+        print("Cout pour les clients relatif : " + str(couts_stations[i].duree_occupation_relatif * COUT_OCCUPATION_PRIO))
+        print("Cout pour les clients ordinaire : " + str(couts_stations[i].duree_occupation_ordinaire * COUT_OCCUPATION_ORDI))
+        print("Cout inoccupation : " + str(couts_stations[i].duree_inoccupation * COUT_INOCCUPATION))
+        print()
 
 def afficher_arrivees(clients):
     i = 1
@@ -359,6 +428,6 @@ if __name__ == "__main__":
             ri.append(1)
 
     𝜆 = esperance(Ci, ri)
-    nb_stations_optimal = simulation_file_attente(0.7,2,a,c,m,x0,nombre_stations_minimun(𝜆, DS), 50, 600)
+    nb_stations_optimal = simulation_file_attente(V_PRIORITAIRE,V_ORDINAIRE,a,c,m,x0,nombre_stations_minimun(𝜆, DS), 50, 600)
 
     print("Nombre de stations optimale : " + str(nb_stations_optimal))
