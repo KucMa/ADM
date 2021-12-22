@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import scipy.stats
 
-# Changer les paramètres de la sequence aléatoire (a,c,m,x0) => ligne 195
+# Changer les paramètres de la sequence aléatoire (a,c,m,x0) : ligne 193
 # Alpha est obtenu via un input utilisateur (non validé), si besoin de le fixer : ligne 116
 
 FICHIER = open("phase_1.txt","w")
@@ -113,7 +113,7 @@ def test_carré_unité(un):
     FICHIER.write("La longueur de la séquence est de " + str(longueur_sequence(un))+ "\n")
     FICHIER.write("H0 : La suite passe le test du carré unité\n")
     FICHIER.write("H1 : La suite ne passe pas le test du carré unité\n")
-    alpha = int(input("Valeur pour alpha(%)"))
+    alpha = int(input("Valeur pour alpha (%) : "))
     FICHIER.write("Le test va être réalisé avec un alpha de " + str(alpha) + "%\n")
 
     tableau = {
@@ -188,9 +188,6 @@ def save_tableau(tableau, fichier):
     df.insert(4, "npi", tableau["npi"])
     df.insert(5, "(ri-npi)²/npi", tableau["(ri-npi)²/npi"])
     fichier.write(str(df) + "\n")
-
-def carre_unité(un):
-    test_carré_unité(un)
 
 if __name__ == "__main__":
     m = 1500
