@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import scipy.stats
 
-FICHIER = open("phase_1.txt","w")
+FICHIER = open("test_carree_unite.txt","w")
 
 def xn(m, a, c, x0):
     xn = [x0]
@@ -39,9 +39,6 @@ def a_periode_max(a, c, m):
     if est_multiple(m, 4) and not est_multiple(a - 1, 4):
         return False
     return True
-
-def longueur_sequence (sequence) :
-    return len(sequence)
 
 def valeurs_pour_périodes_max(m):
     c = 2
@@ -107,11 +104,9 @@ def regroupement(tableau_continu):
 def test_carré_unité(un):
 
     FICHIER.write("Test du Carrée unitée \n")
-    FICHIER.write("La longueur de la séquence est de " + longueur_sequence(un))
-    FICHIER.write("H0 : La suite passe le test du carré unité\n")
-    FICHIER.write("H1 : La suite ne passe pas le test du carré unité\n")
-    alpha = int(input("Valeur pour alpha(%)"))
-    FICHIER.write("Le test va être réalisé avec un alpha de " + alpha + "%\n")
+    FICHIER.write("H0 : \n")
+    FICHIER.write("H1 : \n")
+    FICHIER.write("Le teste va être réalisé avec un alpha de 5% \n")
 
     tableau = {
         "Xi" : générer_intervalles(0.1, 0, 2),
@@ -157,7 +152,7 @@ def test_carré_unité(un):
     save_tableau(tableau, FICHIER)
 
     Ki2_obs = sum(tableau["(ri-npi)²/npi"])
-    no_reject_zone = scipy.stats.chi2.ppf(1-(alpha/100), df = len(tableau["ri"])-1)
+    no_reject_zone = scipy.stats.chi2.ppf(1-0.05, df = len(tableau["ri"])-1)
     is_ok = no_reject_zone > Ki2_obs
 
     FICHIER.write("-" * 50)
@@ -166,12 +161,12 @@ def test_carré_unité(un):
     FICHIER.write("n: " + str(sum(tableau["ri"])) + "\n")
     FICHIER.write("Ki2 Obs : " + str(sum(tableau["(ri-npi)²/npi"])) + "\n")
     FICHIER.write("Calcul du nombre de degrés de liberté : " + str(len(tableau["ri"]) - 1) + "\n")
-    FICHIER.write("Il faut chercher le ki² avec le bon alpha et le bon degré de libérté dans la table\n") #Automatiquement 
+    FICHIER.write("Il faut chercher le ki² avec le bon alpha et le bon degré de libérté dans la table\n")
     FICHIER.write("Zone de non rejet : " + str(no_reject_zone) + "\n")
     if is_ok:
-        FICHIER.write("Conclusion : Nous ne pouvons pas rejeter H0. Nous sommes sur à 95 %\ que la suite est aléatoire.\n") # Changer conclusion
+        FICHIER.write("Conclusion : Nous ne pouvons pas rejeter H0. Nous sommes sur à 95 %\ que la suite est aléatoire.\n")
     else:
-        FICHIER.write("Conclusion : Nous pouvons rejeter H0 avec " + 100-alpha + "%% de certitude, la suite n'est pas aléatoire  \n")
+        FICHIER.write("Conclusion : Nous pouvons rejeter H0 avec 95%\ de certitude, la suite n'est pas aléatoire  \n")
     FICHIER.close()
 
 
