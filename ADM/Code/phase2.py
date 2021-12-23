@@ -5,7 +5,8 @@ from functools import reduce
 import sys
 import pandas as pd
 
-INTERVALLE_TEMPS_POUR_AFFICHAGE = 20
+#durée_traitement lignes 78
+
 COUT_PRESENCE_SYSTEME_ORDI = 25 / 60
 COUT_PRESENCE_SYSTEME_RELATIF = 35 / 60
 COUT_PRESENCE_SYSTEME_ABSOLU = 45 / 60
@@ -14,9 +15,14 @@ COUT_OCCUPATION_PRIO = 32 / 60
 COUT_INOCCUPATION = 18 / 60
 COUT_PERTE_CLIENT_ORDI = 15
 COUT_PERTE_CLIENT_PRIO = 20
-V_PRIORITAIRE = 0.7
-V_ORDINAIRE = 2
+
+TEMPS_SIMULATION = 600
+INTERVALLE_TEMPS_POUR_AFFICHAGE = 20
+PARAM_POISSON_PRIORITAIRE = 0.7
+PARAM_POISSON_ORDINAIRE = 2
 PROPORTION_ABSOLU = 0.3
+DUREE_IMPATIENCE = 10
+POS_IMPATIENCE = 3
 A = 121
 C = 787
 M = 15000
@@ -116,7 +122,7 @@ def gestion_impatience(file, couts):
             couts["duree_totale_client_ordinaire"] += 1
             couts["duree_file_client_ordinaire"] += 1
 
-        if client.duree_attente >= 10 and pos_file > 3:
+        if client.duree_attente >= DUREE_IMPATIENCE and pos_file > POS_IMPATIENCE:
             clients_perdus.append(client)
         pos_file += 1
 
@@ -421,8 +427,8 @@ if __name__ == "__main__":
     m = M
     x0 = X0
     for i in range(250):
-        nb_arrivees_ordi, x0 = generer_nb_arrivees(a,c,m, x0, V_ORDINAIRE) 
-        nb_arrivees_prio, x0 = generer_nb_arrivees(a,c,m, x0, V_PRIORITAIRE)
+        nb_arrivees_ordi, x0 = generer_nb_arrivees(a,c,m, x0, PARAM_POISSON_ORDINAIRE) 
+        nb_arrivees_prio, x0 = generer_nb_arrivees(a,c,m, x0, PARAM_POISSON_PRIORITAIRE)
         nb_arrivees = nb_arrivees_prio + nb_arrivees_ordi
 
         if nb_arrivees in Ci:
@@ -438,6 +444,6 @@ if __name__ == "__main__":
 
     print("Nombre de stations minimum : " + str(nb_stations_min))
     print("Nombre de stations maximum : " + str(nb_stations_max))
-    nb_stations_optimal = simulation_file_attente(V_PRIORITAIRE,V_ORDINAIRE,a,c,m,x0, nb_stations_min, nb_stations_max, 600)
+    nb_stations_optimal = simulation_file_attente(PARAM_POISSON_PRIORITAIRE,PARAM_POISSON_ORDINAIRE,a,c,m,x0, nb_stations_min, nb_stations_max, TEMPS_SIMULATION)
 
     print("Nombre de stations optimale : " + str(nb_stations_optimal))
