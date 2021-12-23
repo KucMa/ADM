@@ -5,6 +5,7 @@ from functools import reduce
 import sys
 import pandas as pd
 
+INTERVALLE_TEMPS_POUR_AFFICHAGE = 20
 COUT_PRESENCE_SYSTEME_ORDI = 25 / 60
 COUT_PRESENCE_SYSTEME_RELATIF = 35 / 60
 COUT_PRESENCE_SYSTEME_ABSOLU = 45 / 60
@@ -16,6 +17,10 @@ COUT_PERTE_CLIENT_PRIO = 20
 V_PRIORITAIRE = 0.7
 V_ORDINAIRE = 2
 PROPORTION_ABSOLU = 0.3
+A = 121
+C = 787
+M = 15000
+X0 = 25
 
 class CoutsStation:
     def __init__(self):
@@ -233,7 +238,7 @@ def simulation_file_attente(v_prioritaire, v_ordinaire, a, c, m, x0, nb_stations
         file = []
 
         for temps in range(temps_simulation):
-            if temps % 20 == 0 and nb_stations == nb_stations_min:
+            if temps % INTERVALLE_TEMPS_POUR_AFFICHAGE == 0 and nb_stations == nb_stations_min:
                 print("---TEMPS DE SIMULTATION : " + str(temps) + "---")
                 print("---DEBUT DE MINUTE---")
                 print()
@@ -250,13 +255,13 @@ def simulation_file_attente(v_prioritaire, v_ordinaire, a, c, m, x0, nb_stations
             
             clients, x0 = nouveaux_clients(v_prioritaire, v_ordinaire, a, c, m, x0)
 
-            if temps % 20 == 0 and nb_stations == nb_stations_min:
+            if temps % INTERVALLE_TEMPS_POUR_AFFICHAGE == 0 and nb_stations == nb_stations_min:
                 afficher_arrivees(clients)
 
             gestion_file(file, clients)
             gestion_clients_prioritaire(stations, file, a, c, m, x0)
 
-            if temps % 20 == 0 and nb_stations == nb_stations_min:
+            if temps % INTERVALLE_TEMPS_POUR_AFFICHAGE == 0 and nb_stations == nb_stations_min:
                 print("---FILE & STATIONS APRES PLACEMENT PRIO---")
                 print()
                 afficher_stations(stations)
@@ -293,7 +298,7 @@ def simulation_file_attente(v_prioritaire, v_ordinaire, a, c, m, x0, nb_stations
 
                 iStation += 1
             
-            if temps % 20 == 0 and nb_stations == nb_stations_min:
+            if temps % INTERVALLE_TEMPS_POUR_AFFICHAGE == 0 and nb_stations == nb_stations_min:
                 print("---TEMPS DE SIMULTATION : " + str(temps) + "---")
                 print("---FIN DE MINUTES---")
                 print()
@@ -406,18 +411,18 @@ def afficher_file(file):
     
 
 if __name__ == "__main__":
-    a = 121
-    c = 789
-    m = 15000
-    x0 = 25
     Ci = [1,2,3,4,5,6]
     ri = [24,18,11,4,3,2]
     DS = esperance(Ci, ri)
     Ci = []
     ri = []
+    a = A
+    c = C
+    m = M
+    x0 = X0
     for i in range(250):
-        nb_arrivees_ordi, x0 = generer_nb_arrivees(a,c,m, x0, 2) 
-        nb_arrivees_prio, x0 = generer_nb_arrivees(a,c,m, x0, 0.7)
+        nb_arrivees_ordi, x0 = generer_nb_arrivees(a,c,m, x0, V_ORDINAIRE) 
+        nb_arrivees_prio, x0 = generer_nb_arrivees(a,c,m, x0, V_PRIORITAIRE)
         nb_arrivees = nb_arrivees_prio + nb_arrivees_ordi
 
         if nb_arrivees in Ci:
@@ -428,6 +433,11 @@ if __name__ == "__main__":
             ri.append(1)
 
     𝜆 = esperance(Ci, ri)
-    nb_stations_optimal = simulation_file_attente(V_PRIORITAIRE,V_ORDINAIRE,a,c,m,x0,nombre_stations_minimun(𝜆, DS), 50, 600)
+    nb_stations_min = nombre_stations_minimun(𝜆, DS)
+    nb_stations_max = max(Ci) * 6
+
+    print("Nombre de stations minimum : " + str(nb_stations_min))
+    print("Nombre de stations maximum : " + str(nb_stations_max))
+    nb_stations_optimal = simulation_file_attente(V_PRIORITAIRE,V_ORDINAIRE,a,c,m,x0, nb_stations_min, nb_stations_max, 600)
 
     print("Nombre de stations optimale : " + str(nb_stations_optimal))

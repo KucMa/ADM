@@ -47,15 +47,18 @@ def longueur_sequence (sequence) :
     return len(sequence)
 
 def valeurs_pour_périodes_max(m):
+    valeurs = []
     c = 2
     a = 2
-    while c < m and not a_periode_max(a, c, m):
-        while a < m and not a_periode_max(a, c, m):
+    while c < m:
+        while a < m:
+            if a_periode_max(a, c, m):
+                valeurs.append({"a" : a, "c" : c})
             a += 1
-        if not a_periode_max(a, c, m):
-            c += 1
-            a = 2
-    return a, c
+        a = 2
+        c += 1
+    
+    return valeurs
 
 def générer_intervalles(step, début, fin):
     intervalles = {"Début" : [], "Fin" : []}
@@ -190,9 +193,13 @@ def save_tableau(tableau, fichier):
     fichier.write(str(df) + "\n")
 
 if __name__ == "__main__":
-    m = 1500
-    a = 23
-    c = 82
+    m = 120000
+
+    #valeurs_pour_périodes_max(m)
+
+    print(valeurs_pour_périodes_max(m))
+    """ a = 21
+    c = 3
     x0 = 21
-    test_carré_unité(un(m, a, c, x0))
+    test_carré_unité(un(m, a, c, x0)) """
 
